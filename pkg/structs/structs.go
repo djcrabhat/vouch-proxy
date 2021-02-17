@@ -28,6 +28,7 @@ type User struct {
 	Username   string `json:"username" mapstructure:"username"`
 	Name       string `json:"name" mapstructure:"name"`
 	Email      string `json:"email" mapstructure:"email"`
+	Sub        string `json:"sub"`
 	CreatedOn  int64  `json:"createdon"`
 	LastUpdate int64  `json:"lastupdate"`
 	// don't populate ID from json https://github.com/vouch/vouch-proxy/issues/185
@@ -40,14 +41,17 @@ type User struct {
 // PrepareUserData implement PersonalData interface
 func (u *User) PrepareUserData() {
 	if u.Username == "" {
-		u.Username = u.Email
+		if u.Email != "" {
+			u.Username = u.Email
+		} else {
+			u.Username = u.Sub
+		}
 	}
 }
 
 // AzureUser is a retrieved and authenticated user from Azure AD
 type AzureUser struct {
 	User
-	Sub string `json:"sub"`
 	UPN string `json:"upn"`
 }
 
@@ -71,7 +75,6 @@ func (u *AzureUser) PrepareUserData() {
 // https://golang.org/doc/effective_go.html#embedding
 type GoogleUser struct {
 	User
-	Sub           string `json:"sub"`
 	GivenName     string `json:"given_name"`
 	FamilyName    string `json:"family_name"`
 	Profile       string `json:"profile"`
@@ -90,7 +93,6 @@ func (u *GoogleUser) PrepareUserData() {
 // ADFSUser Active Directory user record
 type ADFSUser struct {
 	User
-	Sub string `json:"sub"`
 	UPN string `json:"upn"`
 	// UniqueName string `json:"unique_name"`
 	// PwdExp     string `json:"pwd_exp"`
